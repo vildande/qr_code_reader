@@ -9,6 +9,13 @@ FetchContent_MakeAvailable(ZXing)
 
 zxing_add_package_stb()
 
-add_executable(qrcode main.cpp)
+add_executable(qrcode 
+  src/main.cpp
+  src/bit_grid.cpp
+  src/zxing_grid_reader.cpp
+)
 target_compile_features(qrcode PRIVATE "cxx_std_${PROJECT_CXX_STANDARD}")
+
+target_include_directories(qrcode PRIVATE include)
+
 target_link_libraries(qrcode PRIVATE ZXing::ZXing stb::stb)
