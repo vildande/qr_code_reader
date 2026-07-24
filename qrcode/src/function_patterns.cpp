@@ -3,13 +3,20 @@
 #include <stdexcept>
 
 namespace qr {
+namespace {
 
-FunctionPatternMap::FunctionPatternMap(int version) : reserved_{21, 21} {
-    if (version != 1) {
-        throw std::invalid_argument{"FunctionPatternMap currently supports only QR version 1"};
+int size_for_version(int version) {
+    if (version < 1 || version > 4) {
+        throw std::invalid_argument{"FunctionPatternMap supports only QR versions 1-4"};
     }
+    return 17 + 4 * version;
+}
 
-    constexpr int size = 21;
+} // namespace
+
+FunctionPatternMap::FunctionPatternMap(int version)
+    : reserved_{size_for_version(version), size_for_version(version)} {
+    const int size = reserved_.width();
 
     auto mark = [this](ModuleCoord p) {
         if (reserved_.in_bounds(p)) {
@@ -28,6 +35,11 @@ FunctionPatternMap::FunctionPatternMap(int version) : reserved_{21, 21} {
     mark_rect(0, 0, 8, 8);
     mark_rect(size - 8, 0, 8, 8);
     mark_rect(0, size - 8, 8, 8);
+
+    if (version >= 2) {
+        const int alignment_center = size - 7;
+        mark_rect(alignment_center - 2, alignment_center - 2, 5, 5);
+    }
 
     for (int i = 0; i < size; ++i) {
         mark({i, 6});

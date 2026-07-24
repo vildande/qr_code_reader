@@ -1,100 +1,34 @@
-// #include <BitMatrix.h>
-// #include <HybridBinarizer.h>
-// #include <ZXingCpp.h>
-// #include <qrcode/QRBitMatrixParser.h>
-
-// #include <bitset>
-// #include <cstdint>
-#include <iostream>
-#include <print>
-// #include <ranges>
-#include <string>
-
-// #define STB_IMAGE_IMPLEMENTATION
-// #include <stb_image.h>
-
-// using namespace ZXing;
-
+#include <qrcode/decoder.h>
+#include <qrcode/function_patterns.h>
 #include <qrcode/zxing_grid_reader.h>
 
+#include <exception>
+#include <iostream>
+#include <print>
+#include <string>
 
 int main(int argc, char** argv) {
     if (argc != 2) {
-        std::cerr << "Usage: qrcode <image>\n";
+        std::cerr << "The correct way to to run is: qrcode <image>\n";
         return 1;
     }
-    std::string filePath = argv[1];
 
-
-    const std::string image_path{argv[1]};
-    qr::ZxingGridReader reader;
-
-    auto grid = reader.read_version1_grid(image_path);
-
+    const qr::ZxingGridReader reader;
+    auto grid = reader.read_grid(std::string{argv[1]});
     if (!grid) {
-        std::cerr << "Image error: " << grid.error() << '\n';
+        std::cerr << "Error reading image: " << grid.error() << '\n';
         return 1;
     }
 
-    // Temporary debug (print the grid):
-    for (int y = 0; y < grid->height(); ++y) {
-        for (int x = 0; x < grid->width(); ++x) {
-            std::print("{}", grid->at({x, y}) ? "##" : "  ");
-        }
-        std::println("");
+    try {
+        const int version = (grid->width() - 17) / 4;
+        const qr::FunctionPatternMap function_patterns{version};
+        std::string message = qr::decode_message(*grid, function_patterns);
+        std::println("{}", message);
+    } catch (const std::exception& error) {
+        std::cerr << "Decode error: " << error.what() << '\n';
+        return 1;
     }
 
-
-    std::println("Hello, QR Code!");
-
-
-    // int width, height, channels;
-
-    // std::unique_ptr<stbi_uc, void (*)(void*)> buffer(
-    //     stbi_load(filePath.c_str(), &width, &height, &channels, 0),
-    //     stbi_image_free);
-    // auto ImageFormatFromChannels =
-    //     std::array{ImageFormat::None, ImageFormat::Lum, ImageFormat::LumA,
-    //                ImageFormat::RGB, ImageFormat::RGBA};
-    // ImageView image{buffer.get(), width, height,
-    //                 ImageFormatFromChannels.at(channels)};
-
-
-
-    // // Crop size is always 4 in the test cases.
-    // // Change the version if you are not reading Version 1.
-    // int version = 1;
-    // auto size = 17 + 4 * version;
-    // auto cropped = image.cropped(4, 4, size, size);
-
-    // // bitmap is a matrix of bool (true: black, false: white).
-    // auto bitmap = std::make_unique<HybridBinarizer>(cropped)->getBlackMatrix();
-
-
-
-    // // Draw bitmap to show that it is exactly the QR Code we read in.
-    // // You can delete this code.
-    // std::println("bitmap:");
-    // for (auto i : std::views::iota(0, 21)) {
-    //     for (auto j : std::views::iota(0, 21)) {
-    //         bitmap->get(j, i) == true ? std::print("■ ") : std::print("  ");
-    //     }
-    //     std::println("");
-    // }
-
-
-    // // You decoder goes here.
-
-    // // You can compare your results using the solution below.
-    // ReaderOptions options;
-    // options.tryHarder(false)
-    //     .tryRotate(false)
-    //     .tryInvert(false)
-    //     .tryDownscale(false)
-    //     .maxNumberOfSymbols(1)
-    //     .isPure(true)
-    //     .returnErrors(true);
-    // auto barcodes = ReadBarcodes(image, options);
-    // std::println("{}", barcodes[0].text());
-
+    return 0;
 }

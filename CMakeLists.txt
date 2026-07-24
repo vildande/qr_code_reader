@@ -5,6 +5,10 @@ project(
   VERSION 0.0.0
   LANGUAGES CXX C)
 
+include(CTest)
+
+option(BUILD_DOCS "Build the Doxygen API documentation" OFF)
+
 set(PROJECT_CXX_STANDARD
     23
     CACHE STRING "C++ standard, available option: 20, 23")
@@ -24,4 +28,9 @@ elseif(PROJECT_TOPIC STREQUAL VIGENERE)
   add_subdirectory(vigenere)
 elseif(PROJECT_TOPIC STREQUAL PI)
   add_subdirectory(pi)
+endif()
+
+if(BUILD_DOCS)
+  find_package(Doxygen REQUIRED)
+  add_subdirectory(docs)
 endif()
