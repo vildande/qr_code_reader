@@ -78,5 +78,3 @@ Open `build/docs/html/index.html`.
 - `constexpr` improves runtime efficiency (Reed-Solomon correction is calculated at compile time).
 - `std::ranges::all_of` and `std::popcount` simplify validation.
 - `std::unique_ptr` with a custom deleter safely releases the loaded image.
-
-The API docs contains only the operations used by the decoding pipeline.
