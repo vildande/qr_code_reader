@@ -70,7 +70,7 @@ cmake --build build --target doc
 
 Open `build/docs/html/index.html`.
 
-## Modern C++:
+## Modern C++
 
 - `std::expected` for explicit success/error handling.
 - `std::span` lets `BitStream` read bits without copying or owning them.
